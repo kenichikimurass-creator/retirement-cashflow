@@ -3,9 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101828">
-<link rel="manifest" href="manifest.json">
-<title>退職後キャッシュフロー・シンプル試算 v8 PINロック版</title>
+<title>退職後キャッシュフロー・シンプル試算 v9 スマホ対応版</title>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e4e7ec;--accent:#2457c5;--good:#087443;--bad:#b42318;--warn:#b54708;--soft:#eef4ff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic","YuGothic","Meiryo",sans-serif}header{background:#101828;color:#fff;padding:22px 28px}h1{margin:0;font-size:22px}header p{margin:8px 0 0;color:#d0d5dd;font-size:13px;line-height:1.7}main{display:grid;grid-template-columns:410px 1fr;gap:16px;padding:16px;max-width:1480px;margin:auto}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.06)}.panel{padding:16px;position:sticky;top:10px;height:calc(100vh - 112px);overflow:auto}.section{padding-top:16px;margin-top:16px;border-top:1px solid var(--line)}.section:first-child{border-top:0;margin-top:0;padding-top:0}h2{font-size:15px;margin:0 0 12px}.field{margin:13px 0}label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:13px;font-weight:700}label span:last-child{color:var(--accent);white-space:nowrap}input[type=range]{width:100%}.hint{font-size:12px;line-height:1.75;color:var(--muted);background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:10px}.checkrow{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55;margin:9px 0}.checkrow input{margin-top:3px}.checkrow strong{display:block}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}button{border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer;background:#101828;color:white}button.secondary{background:#e4e7ec;color:#101828}button.danger{background:#fee4e2;color:#912018}.savegrid{display:grid;grid-template-columns:1fr;gap:8px}.savegrid input,.savegrid select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;background:white}.savegrid .actions{grid-template-columns:1fr 1fr}.status{font-size:12px;line-height:1.6;color:var(--muted);min-height:1.2em}.content{display:flex;flex-direction:column;gap:14px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.kpi{background:white;border:1px solid var(--line);border-radius:15px;padding:14px}.kpi .label{font-size:12px;color:var(--muted);line-height:1.45}.kpi .value{font-size:22px;font-weight:900;margin-top:6px}.good .value{color:var(--good)}.bad .value{color:var(--bad)}.warn .value{color:var(--warn)}.card{padding:16px}.card h3{margin:0 0 10px;font-size:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini{font-size:12px;color:var(--muted);line-height:1.7}.formula{background:var(--soft);border:1px solid #c7d7fe;border-radius:12px;padding:12px;font-size:13px;line-height:1.8}.notice{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;font-size:13px;line-height:1.75;color:#7c2d12}canvas{width:100%;height:320px;border:1px solid var(--line);border-radius:12px;background:white}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{background:#f9fafb;position:sticky;top:0}.tablewrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:12px}.assetlines{display:grid;grid-template-columns:1fr auto auto;gap:7px 12px;font-size:13px;align-items:center}.assetlines div:nth-child(3n+2){text-align:right;font-weight:800}.tag{font-size:11px;border-radius:999px;padding:3px 8px;text-align:center}.tag.use{background:#ecfdf3;color:#087443}.tag.keep{background:#f2f4f7;color:#475467}.tag.lock{background:#fff7ed;color:#b54708}.negative{color:var(--bad);font-weight:800}.subtle{color:var(--muted)}
@@ -15,6 +13,49 @@
 .pin-input{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:18px;margin:8px 0;background:#fff;letter-spacing:.16em}
 .auth-message{min-height:1.5em;color:var(--bad);font-size:13px;line-height:1.6}.auth-note{background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);margin:12px 0}.auth-clear{width:100%;margin-top:8px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}.topbar button{padding:8px 10px;font-size:12px}
 @media(max-width:1050px){main{grid-template-columns:1fr}.panel{position:relative;height:auto}.grid,.grid3,.two{grid-template-columns:1fr 1fr}}@media(max-width:680px){.grid,.grid3,.two{grid-template-columns:1fr}.assetlines{grid-template-columns:1fr auto}}
+
+
+/* v9: iPhone 12 miniなど小画面向け。横スクロールを極力なくす */
+@media(max-width:480px){
+  html,body{width:100%;overflow-x:hidden;background:#f4f6fb}
+  header{padding:16px 14px;border-bottom-left-radius:0;border-bottom-right-radius:0}
+  header h1{font-size:18px;line-height:1.35}
+  header p{font-size:12px;line-height:1.65}
+  main{display:block;padding:10px;max-width:100%;width:100%}
+  .panel,.card{border-radius:14px;box-shadow:0 4px 14px rgba(16,24,40,.05)}
+  .panel{position:relative;top:auto;height:auto;max-height:none;overflow:visible;padding:12px;margin-bottom:12px}
+  .content{gap:10px;width:100%}
+  .section{padding-top:14px;margin-top:14px}
+  h2{font-size:14px}.card h3{font-size:15px}
+  .field{margin:12px 0}
+  label{display:block;font-size:12px;line-height:1.5}
+  label span:last-child{display:block;margin-top:2px;font-size:13px;white-space:normal}
+  input[type=range]{height:34px}
+  .hint,.formula,.notice{font-size:12px;line-height:1.65;padding:10px}
+  .actions,.savegrid .actions{grid-template-columns:1fr;gap:8px}
+  button{width:100%;padding:11px 10px;font-size:14px}
+  .grid,.grid3,.two{display:grid;grid-template-columns:1fr;gap:9px}
+  .kpi{padding:12px;border-radius:13px}
+  .kpi .value{font-size:20px;line-height:1.25;word-break:break-word}
+  .assetlines{grid-template-columns:1fr;gap:4px;font-size:12px}
+  .assetlines div:nth-child(3n+2){text-align:left;font-size:15px}
+  .assetlines .tag{display:inline-block;width:max-content}
+  canvas{height:230px;max-width:100%}
+  .topbar{display:block}.topbar button{margin-top:8px}
+  .auth-card{padding:18px;border-radius:16px}.auth-card h1{font-size:19px}.pin-input{font-size:16px}
+
+  /* 年次明細を横長テーブルではなくカードに変形 */
+  .tablewrap{max-height:none;overflow:visible;border:0;border-radius:0;background:transparent}
+  table,thead,tbody,tr,th,td{display:block;width:100%}
+  thead{display:none}
+  tbody tr{background:#fff;border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:8px;box-shadow:0 3px 10px rgba(16,24,40,.04)}
+  td{border:0;border-bottom:1px dashed #e4e7ec;text-align:right;white-space:normal;padding:7px 4px 7px 46%;min-height:30px;position:relative;font-size:12px;line-height:1.45}
+  td:last-child{border-bottom:0}
+  td::before{content:attr(data-label);position:absolute;left:4px;top:7px;width:42%;text-align:left;color:var(--muted);font-weight:700;white-space:normal}
+  td:first-child{background:#f9fafb;border-radius:9px;text-align:left;padding:8px 10px;margin-bottom:4px;font-weight:900;font-size:14px}
+  td:first-child::before{content:'';display:none}
+}
+
 </style>
 </head>
 <body>
@@ -45,7 +86,7 @@
 </div>
 <div id="appRoot" hidden>
 <header>
-  <h1>退職後キャッシュフロー・シンプル試算 v8 PINロック版</h1>
+  <h1>退職後キャッシュフロー・シンプル試算 v9 スマホ対応版</h1>
   <p>月30万円を手元に残すために、年金・フリーランス収入・資産取り崩しをざっくり確認します。GitHub Pages公開を前提に、初期値に個人資産額は入れていません。保存データはPINから作る鍵で暗号化して、この端末のブラウザ内に保存します。</p>
   <div class="topbar"><span class="mini">保存シナリオはPINで暗号化され、このブラウザ内に保存されます。</span><button id="logoutBtn" class="secondary">ロックする</button></div>
 </header>
@@ -132,7 +173,7 @@
   </div>
   <div class="card"><h3>資産の内訳</h3><div class="assetlines" id="assetLines"></div></div>
   <div class="card"><h3>資産推移</h3><canvas id="chart" width="900" height="320"></canvas><div class="mini">青線：生活資金として使える残高。点線：使わない設定の資産やロック中DCも含めた総資産。</div></div>
-  <div class="card"><h3>年次明細</h3><div class="tablewrap"><table><thead><tr><th>年齢</th><th>必要額</th><th>本人年金・給付</th><th>奥さん老齢年金</th><th>年金・給付合計</th><th>会社員手取り</th><th>フリーランス手取り</th><th>余ったお金</th><th>資産から補填</th><th>補填できない不足</th><th>年末使える残高</th><th>年末総資産</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
+  <div class="card"><h3>年次明細</h3><div class="tablewrap"><table id="detailTable"><thead><tr><th>年齢</th><th>必要額</th><th>本人年金・給付</th><th>奥さん老齢年金</th><th>年金・給付合計</th><th>会社員手取り</th><th>フリーランス手取り</th><th>余ったお金</th><th>資産から補填</th><th>補填できない不足</th><th>年末使える残高</th><th>年末総資産</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
 </section>
 </main>
 </div>
@@ -212,6 +253,10 @@ function renderAssets(o){
  box.insertAdjacentHTML('beforeend','<div><strong>公開用のため個別資産額は初期値に入れていません</strong><div class="mini">退職一時金・預金1〜3などは「自分名義：現金系」に合計額で入力してください。</div></div><div></div><div><span class="tag keep">安全</span></div>');
  assets.forEach(a=>{box.insertAdjacentHTML('beforeend','<div><strong>'+a.name+'</strong><div class="mini">'+a.details+'</div></div><div>'+yen(a.balance)+'</div><div>'+tagFor(a,o)+'</div>')});
 }
+function addMobileLabels(){
+ const headers=[...document.querySelectorAll('#detailTable thead th')].map(th=>th.textContent.trim());
+ document.querySelectorAll('#detailTable tbody tr').forEach(tr=>{[...tr.children].forEach((td,i)=>td.setAttribute('data-label',headers[i]||''));});
+}
 function render(){
  const o=read(); updateLabels(o); const result=simulate(o); latestRows=result.rows;
  const req=findRequiredFreelance(o),reqNet=req*o.freelanceNetRate/100,gap=Math.max(0,req-o.freelanceGross);
@@ -224,6 +269,7 @@ function render(){
  document.getElementById('noticeText').innerHTML=firstShort?'<strong>'+firstShort.age+'歳で資金ショートしています。</strong><br>この年は、収入と取り崩し対象資産だけでは <span class="negative">'+man(firstShort.uncovered)+'</span> 足りません。<br>年末総資産がゼロでない場合は、DCがまだ使えない、または「残す」にした資産があるためです。':'<strong>設定上は資金ショートしていません。</strong><br>終了年齢まで、必要額を収入と取り崩し対象資産で埋められる計算です。';
  renderAssets(o);
  const tbody=document.getElementById('tbody'); tbody.innerHTML=''; result.rows.forEach(r=>{const tr=document.createElement('tr'); tr.innerHTML='<td>'+r.age+'歳</td><td>'+man(r.need)+'</td><td>'+man(r.selfBenefit)+'</td><td>'+man(r.spousePension)+'</td><td>'+man(r.pension)+'</td><td>'+man(r.salary)+'</td><td>'+man(r.freelance)+'</td><td>'+man(r.surplus)+'</td><td>'+man(r.taken)+'</td><td class="'+(r.uncovered>1?'negative':'')+'">'+(r.uncovered>1?man(r.uncovered):'0円')+'</td><td>'+man(r.usableEnding)+'</td><td>'+man(r.totalEnding)+'</td>'; tbody.appendChild(tr)});
+ addMobileLabels();
  draw(result.rows);
 }
 
@@ -254,7 +300,7 @@ async function decryptJson(bundle,key){
  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
  return JSON.parse(new TextDecoder().decode(pt));
 }
-function getScenarioPayload(){return {app:'retirement_cashflow_simulator_simple',version:'v8',savedAt:safeNow(),name:(document.getElementById('scenarioName').value||'無題シナリオ').trim(),values:read()}}
+function getScenarioPayload(){return {app:'retirement_cashflow_simulator_simple',version:'v9',savedAt:safeNow(),name:(document.getElementById('scenarioName').value||'無題シナリオ').trim(),values:read()}}
 function applyScenarioValues(values){
  if(!values) return;
  ids.forEach(id=>{if(values[id]!==undefined && document.getElementById(id)) document.getElementById(id).value=values[id]});
@@ -371,7 +417,6 @@ ids.forEach(id=>document.getElementById(id).addEventListener('input',render)); c
 document.getElementById('resetBtn').addEventListener('click',resetDefaults); document.getElementById('csvBtn').addEventListener('click',downloadCsv);
 document.getElementById('saveScenarioBtn').addEventListener('click',()=>saveScenario()); document.getElementById('loadScenarioBtn').addEventListener('click',()=>loadScenario()); document.getElementById('deleteScenarioBtn').addEventListener('click',()=>deleteScenario()); document.getElementById('exportScenarioBtn').addEventListener('click',()=>exportScenario()); document.getElementById('importScenarioFile').addEventListener('change',importScenario);
 try{initAuth()}catch(e){document.getElementById('authMessage').textContent='初期化エラー：'+e.message; console.error(e)}
-if('serviceWorker' in navigator && location.protocol !== 'file:'){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 })();
 </script>
 </body>

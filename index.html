@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101828">
+<link rel="manifest" href="manifest.json">
+<title>退職後キャッシュフロー・シンプル試算 v8 PINロック版</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e4e7ec;--accent:#2457c5;--good:#087443;--bad:#b42318;--warn:#b54708;--soft:#eef4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic","YuGothic","Meiryo",sans-serif}header{background:#101828;color:#fff;padding:22px 28px}h1{margin:0;font-size:22px}header p{margin:8px 0 0;color:#d0d5dd;font-size:13px;line-height:1.7}main{display:grid;grid-template-columns:410px 1fr;gap:16px;padding:16px;max-width:1480px;margin:auto}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.06)}.panel{padding:16px;position:sticky;top:10px;height:calc(100vh - 112px);overflow:auto}.section{padding-top:16px;margin-top:16px;border-top:1px solid var(--line)}.section:first-child{border-top:0;margin-top:0;padding-top:0}h2{font-size:15px;margin:0 0 12px}.field{margin:13px 0}label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:13px;font-weight:700}label span:last-child{color:var(--accent);white-space:nowrap}input[type=range]{width:100%}.hint{font-size:12px;line-height:1.75;color:var(--muted);background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:10px}.checkrow{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55;margin:9px 0}.checkrow input{margin-top:3px}.checkrow strong{display:block}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}button{border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer;background:#101828;color:white}button.secondary{background:#e4e7ec;color:#101828}button.danger{background:#fee4e2;color:#912018}.savegrid{display:grid;grid-template-columns:1fr;gap:8px}.savegrid input,.savegrid select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;background:white}.savegrid .actions{grid-template-columns:1fr 1fr}.status{font-size:12px;line-height:1.6;color:var(--muted);min-height:1.2em}.content{display:flex;flex-direction:column;gap:14px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.kpi{background:white;border:1px solid var(--line);border-radius:15px;padding:14px}.kpi .label{font-size:12px;color:var(--muted);line-height:1.45}.kpi .value{font-size:22px;font-weight:900;margin-top:6px}.good .value{color:var(--good)}.bad .value{color:var(--bad)}.warn .value{color:var(--warn)}.card{padding:16px}.card h3{margin:0 0 10px;font-size:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini{font-size:12px;color:var(--muted);line-height:1.7}.formula{background:var(--soft);border:1px solid #c7d7fe;border-radius:12px;padding:12px;font-size:13px;line-height:1.8}.notice{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;font-size:13px;line-height:1.75;color:#7c2d12}canvas{width:100%;height:320px;border:1px solid var(--line);border-radius:12px;background:white}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{background:#f9fafb;position:sticky;top:0}.tablewrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:12px}.assetlines{display:grid;grid-template-columns:1fr auto auto;gap:7px 12px;font-size:13px;align-items:center}.assetlines div:nth-child(3n+2){text-align:right;font-weight:800}.tag{font-size:11px;border-radius:999px;padding:3px 8px;text-align:center}.tag.use{background:#ecfdf3;color:#087443}.tag.keep{background:#f2f4f7;color:#475467}.tag.lock{background:#fff7ed;color:#b54708}.negative{color:var(--bad);font-weight:800}.subtle{color:var(--muted)}
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#101828,#344054)}
+.auth-card{width:min(440px,100%);background:white;border-radius:20px;padding:24px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(16,24,40,.28)}
+.auth-card h1{color:#101828;font-size:22px;margin:0 0 8px}.auth-card h2{font-size:16px;margin:18px 0 8px}.auth-lead{font-size:13px;line-height:1.7;color:var(--muted)}
+.pin-input{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:18px;margin:8px 0;background:#fff;letter-spacing:.16em}
+.auth-message{min-height:1.5em;color:var(--bad);font-size:13px;line-height:1.6}.auth-note{background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:12px;line-height:1.7;color:var(--muted);margin:12px 0}.auth-clear{width:100%;margin-top:8px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}.topbar button{padding:8px 10px;font-size:12px}
+@media(max-width:1050px){main{grid-template-columns:1fr}.panel{position:relative;height:auto}.grid,.grid3,.two{grid-template-columns:1fr 1fr}}@media(max-width:680px){.grid,.grid3,.two{grid-template-columns:1fr}.assetlines{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body>
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <h1>退職後キャッシュフロー試算</h1>
+    <p class="auth-lead">保存データを開くにはPINが必要です。PINは端末外へ送信されません。</p>
+    <div id="setupBox" hidden>
+      <h2>はじめて使う</h2>
+      <p class="mini">4桁以上のPINを設定してください。保存シナリオはこのPINで暗号化されます。</p>
+      <input id="newPin" class="pin-input" type="password" inputmode="numeric" autocomplete="new-password" placeholder="新しいPIN">
+      <input id="newPin2" class="pin-input" type="password" inputmode="numeric" autocomplete="new-password" placeholder="確認用PIN">
+      <button id="setupPinBtn">PINを設定して開始</button>
+    </div>
+    <div id="unlockBox" hidden>
+      <h2>ロック解除</h2>
+      <p class="mini">設定済みのPINを入力してください。</p>
+      <input id="unlockPin" class="pin-input" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN">
+      <button id="unlockPinBtn">解除する</button>
+    </div>
+    <p id="authMessage" class="auth-message"></p>
+    <div class="auth-note">
+      <strong>注意</strong><br>
+      PINを忘れると、暗号化された保存シナリオは復元できません。必要に応じて暗号化JSONを書き出してください。
+    </div>
+    <button id="clearAllBtn" class="danger auth-clear">PINと保存データを初期化</button>
+  </div>
+</div>
+<div id="appRoot" hidden>
+<header>
+  <h1>退職後キャッシュフロー・シンプル試算 v8 PINロック版</h1>
+  <p>月30万円を手元に残すために、年金・フリーランス収入・資産取り崩しをざっくり確認します。GitHub Pages公開を前提に、初期値に個人資産額は入れていません。保存データはPINから作る鍵で暗号化して、この端末のブラウザ内に保存します。</p>
+  <div class="topbar"><span class="mini">保存シナリオはPINで暗号化され、このブラウザ内に保存されます。</span><button id="logoutBtn" class="secondary">ロックする</button></div>
+</header>
+<main>
+<aside class="panel">
+  <div class="section">
+    <h2>① 毎月いくら必要か</h2>
+    <div class="field"><label>現在年齢 <span id="v_age"></span></label><input id="age" type="range" min="45" max="64" step="1" value="50"></div>
+    <div class="field"><label>試算終了年齢 <span id="v_endAge"></span></label><input id="endAge" type="range" min="70" max="100" step="1" value="90"></div>
+    <div class="field"><label>毎月手元に残したい額 <span id="v_targetMonthly"></span></label><input id="targetMonthly" type="range" min="150000" max="600000" step="10000" value="300000"></div>
+    <div class="field"><label>税・社会保険料など、毎月引かれる額 <span id="v_taxSocialMonthly"></span></label><input id="taxSocialMonthly" type="range" min="0" max="250000" step="5000" value="60000"></div>
+    <div class="hint">ここは支出側です。例：手元30万円＋税社保6万円なら、毎月36万円の財源が必要です。</div>
+  </div>
+  <div class="section">
+    <h2>② 年金・給付</h2>
+    <div class="field"><label>障害年金 月額 <span id="v_disabilityMonthly"></span></label><input id="disabilityMonthly" type="range" min="0" max="300000" step="5000" value="0"></div>
+    <div class="field"><label>障害年金 開始年齢 <span id="v_disabilityStartAge"></span></label><input id="disabilityStartAge" type="range" min="45" max="70" step="1" value="51"></div>
+    <div class="field"><label>本人の老齢年金 月額 <span id="v_oldAgeMonthly"></span></label><input id="oldAgeMonthly" type="range" min="0" max="400000" step="5000" value="0"></div>
+    <div class="field"><label>本人の老齢年金 開始年齢 <span id="v_oldAgeStartAge"></span></label><input id="oldAgeStartAge" type="range" min="60" max="75" step="1" value="65"></div>
+    <div class="field"><label>奥さんの老齢年金 月額 <span id="v_spouseOldAgeMonthly"></span></label><input id="spouseOldAgeMonthly" type="range" min="0" max="300000" step="5000" value="0"></div>
+    <div class="field"><label>奥さんの老齢年金 開始年齢 <span id="v_spouseOldAgeStartAge"></span></label><input id="spouseOldAgeStartAge" type="range" min="60" max="75" step="1" value="65"></div>
+    <div class="field"><label>傷病手当金 月額 <span id="v_sicknessMonthly"></span></label><input id="sicknessMonthly" type="range" min="0" max="400000" step="10000" value="0"></div>
+    <div class="field"><label>傷病手当金 月数 <span id="v_sicknessMonths"></span></label><input id="sicknessMonths" type="range" min="0" max="18" step="1" value="0"></div>
+    <div class="hint">単純化のため、障害年金は本人の老齢年金開始前まで、本人・奥さんの老齢年金はそれぞれの開始年齢以降に入る前提です。</div>
+  </div>
+  <div class="section">
+    <h2>③ 会社員収入</h2>
+    <div class="field"><label>会社員の額面年収 <span id="v_salaryGrossAnnual"></span></label><input id="salaryGrossAnnual" type="range" min="0" max="12000000" step="100000" value="0"></div>
+    <div class="field"><label>会社員の手取り率 <span id="v_salaryNetRate"></span></label><input id="salaryNetRate" type="range" min="50" max="90" step="5" value="75"></div>
+    <div class="field"><label>会社を辞めてフリーランスになる年齢 <span id="v_switchAge"></span></label><input id="switchAge" type="range" min="50" max="75" step="1" value="55"></div>
+    <div class="hint">今の会社員収入を入れる欄です。額面年収700万円・手取り率75%なら、年間525万円、月約44万円を生活資金に使える想定です。余った分は自分名義の現金系に積み増す計算です。</div>
+  </div>
+  <div class="section">
+    <h2>④ フリーランス収入</h2>
+    <div class="field"><label>フリーランス月額売上 <span id="v_freelanceGross"></span></label><input id="freelanceGross" type="range" min="0" max="800000" step="10000" value="0"></div>
+    <div class="field"><label>フリーランス手取り率 <span id="v_freelanceNetRate"></span></label><input id="freelanceNetRate" type="range" min="40" max="100" step="5" value="70"></div>
+    <div class="field"><label>フリーランス終了年齢 <span id="v_freelanceEndAge"></span></label><input id="freelanceEndAge" type="range" min="50" max="90" step="1" value="65"></div>
+    <div class="hint">フリーランス開始年齢は、上の「会社を辞めてフリーランスになる年齢」と連動します。手取り率70%なら、売上30万円のうち21万円を生活資金に使える想定です。</div>
+  </div>
+  <div class="section">
+    <h2>⑤ 資産と取り崩し設定</h2>
+    <div class="field"><label>自分名義：現金系 <span id="v_cashSelf"></span></label><input id="cashSelf" type="range" min="0" max="50000000" step="100000" value="0"></div>
+    <div class="checkrow"><input id="useCashSelf" type="checkbox" checked><div><strong>自分名義の現金系を使う</strong><span class="mini">退職一時金＋預金1〜3。</span></div></div>
+    <div class="field"><label>奥さん名義：預金 <span id="v_cashSpouse"></span></label><input id="cashSpouse" type="range" min="0" max="30000000" step="100000" value="0"></div>
+    <div class="checkrow"><input id="useCashSpouse" type="checkbox" checked><div><strong>奥さん名義の預金を使う</strong><span class="mini">オフにすると生活資金には使わない試算になります。</span></div></div>
+    <div class="field"><label>NISA <span id="v_nisa"></span></label><input id="nisa" type="range" min="0" max="20000000" step="100000" value="0"></div>
+    <div class="checkrow"><input id="useNisa" type="checkbox" checked><div><strong>NISAを使う</strong><span class="mini">オフにすると残す資産として扱います。</span></div></div>
+    <div class="field"><label>DC <span id="v_dc"></span></label><input id="dc" type="range" min="0" max="30000000" step="100000" value="0"></div>
+    <div class="checkrow"><input id="useDc" type="checkbox" checked><div><strong>DCを使う</strong><span class="mini">オンでも、開始年齢までは使えない前提です。</span></div></div>
+    <div class="field"><label>NISA 運用年率 <span id="v_nisaReturnRate"></span></label><input id="nisaReturnRate" type="range" min="-10" max="10" step="0.5" value="3"></div>
+    <div class="field"><label>DC 運用年率 <span id="v_dcReturnRate"></span></label><input id="dcReturnRate" type="range" min="-10" max="10" step="0.5" value="3"></div>
+    <div class="field"><label>DC取り崩し開始年齢 <span id="v_dcStartAge"></span></label><input id="dcStartAge" type="range" min="60" max="75" step="1" value="60"></div>
+    <div class="hint">現金系は増えない前提です。NISAとDCだけ、指定した年率で毎年増減するようにしています。年率3%は控えめな仮置きで、商品内容によって大きく変わります。</div>
+  </div>
+  <div class="section">
+    <h2>⑥ シミュレーション保存（PINで暗号化）</h2>
+    <div class="savegrid">
+      <input id="scenarioName" type="text" value="基本シナリオ" placeholder="例：55歳退職・月30万円維持">
+      <div class="actions"><button id="saveScenarioBtn" type="button">この条件を保存</button><button id="exportScenarioBtn" class="secondary" type="button">暗号化JSON保存</button></div>
+      <select id="scenarioSelect"><option value="">保存したシナリオを選択</option></select>
+      <div class="actions"><button id="loadScenarioBtn" class="secondary" type="button">読み込む</button><button id="deleteScenarioBtn" class="danger" type="button">削除</button></div>
+      <input id="importScenarioFile" type="file" accept="application/json,.json">
+      <div class="status" id="saveStatus">ブラウザ内保存と、JSONファイル保存の両方に対応しています。</div>
+    </div>
+    <div class="hint">ブラウザ内保存はこのPC・このブラウザに保存されます。別PCへ移す場合やバックアップしたい場合は「暗号化JSON保存」を使ってください。</div>
+  </div>
+  <div class="actions"><button id="resetBtn" type="button">初期値に戻す</button><button id="csvBtn" class="secondary" type="button">CSV出力</button></div>
+</aside>
+<section class="content">
+  <div class="grid">
+    <div class="kpi"><div class="label">総資産</div><div class="value" id="totalAssets">-</div></div>
+    <div class="kpi"><div class="label">生活資金として使う資産</div><div class="value" id="usableAssets">-</div></div>
+    <div class="kpi" id="kpiDeplete"><div class="label">資金ショート年齢</div><div class="value" id="depleteAge">-</div></div>
+    <div class="kpi" id="kpiEnd"><div class="label">終了時点の使える残高</div><div class="value" id="endingUsable">-</div></div>
+  </div>
+  <div class="grid3">
+    <div class="kpi" id="kpiReq"><div class="label">必要フリーランス売上 月額</div><div class="value" id="requiredFreelanceGross">-</div></div>
+    <div class="kpi"><div class="label">必要フリーランス手取り 月額</div><div class="value" id="requiredFreelanceNet">-</div></div>
+    <div class="kpi" id="kpiGap"><div class="label">現在想定との差額</div><div class="value" id="freelanceGap">-</div></div>
+  </div>
+  <div class="two">
+    <div class="card"><h3>読み方</h3><div id="summaryText" class="formula"></div></div>
+    <div class="card"><h3>判定メモ</h3><div id="noticeText" class="notice"></div></div>
+  </div>
+  <div class="card"><h3>資産の内訳</h3><div class="assetlines" id="assetLines"></div></div>
+  <div class="card"><h3>資産推移</h3><canvas id="chart" width="900" height="320"></canvas><div class="mini">青線：生活資金として使える残高。点線：使わない設定の資産やロック中DCも含めた総資産。</div></div>
+  <div class="card"><h3>年次明細</h3><div class="tablewrap"><table><thead><tr><th>年齢</th><th>必要額</th><th>本人年金・給付</th><th>奥さん老齢年金</th><th>年金・給付合計</th><th>会社員手取り</th><th>フリーランス手取り</th><th>余ったお金</th><th>資産から補填</th><th>補填できない不足</th><th>年末使える残高</th><th>年末総資産</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
+</section>
+</main>
+</div>
+<script>
+(function(){
+const ids=['age','endAge','targetMonthly','taxSocialMonthly','disabilityMonthly','disabilityStartAge','oldAgeMonthly','oldAgeStartAge','spouseOldAgeMonthly','spouseOldAgeStartAge','sicknessMonthly','sicknessMonths','salaryGrossAnnual','salaryNetRate','switchAge','freelanceGross','freelanceNetRate','freelanceEndAge','cashSelf','cashSpouse','nisa','dc','nisaReturnRate','dcReturnRate','dcStartAge'];
+const checks=['useCashSelf','useCashSpouse','useNisa','useDc'];
+const defaults={age:50,endAge:90,targetMonthly:300000,taxSocialMonthly:60000,disabilityMonthly:0,disabilityStartAge:51,oldAgeMonthly:0,oldAgeStartAge:65,spouseOldAgeMonthly:0,spouseOldAgeStartAge:65,sicknessMonthly:0,sicknessMonths:0,salaryGrossAnnual:0,salaryNetRate:75,switchAge:55,freelanceGross:0,freelanceNetRate:70,freelanceEndAge:65,cashSelf:0,cashSpouse:0,nisa:0,dc:0,nisaReturnRate:3,dcReturnRate:3,dcStartAge:60,useCashSelf:true,useCashSpouse:true,useNisa:true,useDc:true};
+function yen(n){return Math.round(n).toLocaleString('ja-JP')+'円'}
+function man(n){return Math.round(n/10000).toLocaleString('ja-JP')+'万円'}
+function val(id){return Number(document.getElementById(id).value)}
+function setText(id,txt){const el=document.getElementById(id); if(el) el.textContent=txt}
+function read(){let o={}; ids.forEach(id=>o[id]=val(id)); checks.forEach(id=>o[id]=document.getElementById(id).checked); return o}
+function updateLabels(o){
+ setText('v_age',o.age+'歳'); setText('v_endAge',o.endAge+'歳'); setText('v_targetMonthly',man(o.targetMonthly)); setText('v_taxSocialMonthly',man(o.taxSocialMonthly));
+ setText('v_disabilityMonthly',man(o.disabilityMonthly)); setText('v_disabilityStartAge',o.disabilityStartAge+'歳'); setText('v_oldAgeMonthly',man(o.oldAgeMonthly)); setText('v_oldAgeStartAge',o.oldAgeStartAge+'歳'); setText('v_spouseOldAgeMonthly',man(o.spouseOldAgeMonthly)); setText('v_spouseOldAgeStartAge',o.spouseOldAgeStartAge+'歳'); setText('v_sicknessMonthly',man(o.sicknessMonthly)); setText('v_sicknessMonths',o.sicknessMonths+'か月');
+ setText('v_salaryGrossAnnual',man(o.salaryGrossAnnual)); setText('v_salaryNetRate',o.salaryNetRate+'%'); setText('v_switchAge',o.switchAge+'歳');
+ setText('v_freelanceGross',man(o.freelanceGross)); setText('v_freelanceNetRate',o.freelanceNetRate+'%'); setText('v_freelanceEndAge',o.freelanceEndAge+'歳');
+ setText('v_cashSelf',yen(o.cashSelf)); setText('v_cashSpouse',yen(o.cashSpouse)); setText('v_nisa',yen(o.nisa)); setText('v_dc',yen(o.dc)); setText('v_nisaReturnRate',o.nisaReturnRate+'%'); setText('v_dcReturnRate',o.dcReturnRate+'%'); setText('v_dcStartAge',o.dcStartAge+'歳');
+}
+function buildAssets(o){return [
+ {key:'cashSelf',name:'自分名義 現金系',balance:o.cashSelf,use:o.useCashSelf,start:o.age,sort:1,rate:0,details:'退職一時金＋預金1〜3。増えない前提'},
+ {key:'cashSpouse',name:'奥さん名義 預金',balance:o.cashSpouse,use:o.useCashSpouse,start:o.age,sort:2,rate:0,details:'預金4。増えない前提'},
+ {key:'nisa',name:'NISA',balance:o.nisa,use:o.useNisa,start:o.age,sort:3,rate:o.nisaReturnRate/100,details:'指定した年率で毎年増減'},
+ {key:'dc',name:'DC',balance:o.dc,use:o.useDc,start:o.dcStartAge,sort:4,rate:o.dcReturnRate/100,details:'指定した年率で毎年増減。指定年齢まで取り崩し不可'}
+]}
+function totalsAtAge(assets,age){let total=0,usableNow=0,chosen=0,locked=0,kept=0; assets.forEach(a=>{total+=a.balance; if(a.use) chosen+=a.balance; else kept+=a.balance; if(a.use&&age>=a.start) usableNow+=a.balance; if(a.use&&age<a.start) locked+=a.balance}); return {total,usableNow,chosen,locked,kept}}
+function simulate(o,overrideFreelanceGross=null){
+ let assets=buildAssets(o); let rows=[],deplete=null;
+ const totalInitial=assets.reduce((s,a)=>s+a.balance,0); const chosenInitial=assets.filter(a=>a.use).reduce((s,a)=>s+a.balance,0);
+ for(let age=o.age; age<=o.endAge; age++){
+   if(age>o.age){assets.forEach(a=>a.balance=Math.max(0,a.balance*(1+(a.rate||0))))}
+   const need=(o.targetMonthly+o.taxSocialMonthly)*12;
+   let selfBenefit=0;
+   if(age>=o.disabilityStartAge && age<o.oldAgeStartAge) selfBenefit+=o.disabilityMonthly*12;
+   if(age>=o.oldAgeStartAge) selfBenefit+=o.oldAgeMonthly*12;
+   const spousePension=(age>=o.spouseOldAgeStartAge)?o.spouseOldAgeMonthly*12:0;
+   const monthsFromStart=(age-o.age)*12;
+   const sicknessMonths=Math.max(0,Math.min(12,o.sicknessMonths-monthsFromStart));
+   selfBenefit+=o.sicknessMonthly*sicknessMonths;
+   const pension=selfBenefit+spousePension;
+   const salary=(age>=o.age && age<o.switchAge)?o.salaryGrossAnnual*(o.salaryNetRate/100):0;
+   const fg=(overrideFreelanceGross===null)?o.freelanceGross:overrideFreelanceGross;
+   const freelance=(age>=o.switchAge && age<o.freelanceEndAge)?fg*(o.freelanceNetRate/100)*12:0;
+   const income=pension+salary+freelance;
+   const shortage=Math.max(0,need-income);
+   const surplus=Math.max(0,income-need);
+   let remaining=shortage,taken=0;
+   assets.sort((a,b)=>a.sort-b.sort).forEach(a=>{if(!a.use||age<a.start||remaining<=0)return; const x=Math.min(a.balance,remaining); a.balance-=x; remaining-=x; taken+=x});
+   if(surplus>0){const cash=assets.find(a=>a.key==='cashSelf'); if(cash) cash.balance+=surplus;}
+   if(remaining>1 && deplete===null) deplete=age;
+   const t=totalsAtAge(assets,age);
+   rows.push({age,need,selfBenefit,spousePension,pension,salary,freelance,income,surplus,shortage,taken,uncovered:remaining,usableEnding:t.usableNow,totalEnding:t.total,locked:t.locked,kept:t.kept});
+ }
+ const last=rows[rows.length-1]; return {rows,deplete,endingUsable:last.usableEnding,endingTotal:last.totalEnding,totalInitial,chosenInitial,assets};
+}
+function findRequiredFreelance(o){
+ if(o.switchAge>=o.freelanceEndAge || o.freelanceNetRate<=0) return 0;
+ if(simulate({...o,freelanceGross:0},0).deplete===null) return 0;
+ let lo=0,hi=1000000;
+ while(simulate({...o,freelanceGross:0},hi).deplete!==null && hi<6000000){hi*=1.5}
+ for(let i=0;i<44;i++){const mid=(lo+hi)/2; if(simulate({...o,freelanceGross:0},mid).deplete===null) hi=mid; else lo=mid}
+ return hi;
+}
+function draw(rows){
+ const c=document.getElementById('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height; ctx.clearRect(0,0,w,h);
+ const pad=44,vals=rows.flatMap(r=>[Math.max(0,r.usableEnding),Math.max(0,r.totalEnding)]),max=Math.max(...vals,1);
+ ctx.strokeStyle='#e4e7ec'; ctx.lineWidth=1; ctx.font='12px sans-serif'; ctx.fillStyle='#667085';
+ for(let i=0;i<=4;i++){const y=pad+(h-2*pad)*i/4; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y); ctx.stroke(); const v=max*(1-i/4); ctx.fillText(man(v),6,y+4)}
+ function line(key,color,width,dashed){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dashed?[7,6]:[]);ctx.beginPath();rows.forEach((r,i)=>{const x=pad+(w-2*pad)*i/(rows.length-1||1); const y=h-pad-(h-2*pad)*Math.max(0,r[key])/max; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y)});ctx.stroke();ctx.setLineDash([])}
+ line('totalEnding','#98a2b3',2,true); line('usableEnding','#2457c5',3,false);
+ ctx.fillStyle='#172033'; ctx.fillText(rows[0].age+'歳',pad,h-12); ctx.fillText(rows[rows.length-1].age+'歳',w-pad-30,h-12); ctx.fillText('青：使える残高　点線：総資産',w-210,22);
+}
+function tagFor(a,o){if(!a.use)return '<span class="tag keep">残す</span>'; if(a.key==='dc')return '<span class="tag lock">'+o.dcStartAge+'歳から使う</span>'; return '<span class="tag use">使う</span>'}
+function renderAssets(o){
+ const assets=buildAssets(o),box=document.getElementById('assetLines'); box.innerHTML='';
+ box.insertAdjacentHTML('beforeend','<div><strong>公開用のため個別資産額は初期値に入れていません</strong><div class="mini">退職一時金・預金1〜3などは「自分名義：現金系」に合計額で入力してください。</div></div><div></div><div><span class="tag keep">安全</span></div>');
+ assets.forEach(a=>{box.insertAdjacentHTML('beforeend','<div><strong>'+a.name+'</strong><div class="mini">'+a.details+'</div></div><div>'+yen(a.balance)+'</div><div>'+tagFor(a,o)+'</div>')});
+}
+function render(){
+ const o=read(); updateLabels(o); const result=simulate(o); latestRows=result.rows;
+ const req=findRequiredFreelance(o),reqNet=req*o.freelanceNetRate/100,gap=Math.max(0,req-o.freelanceGross);
+ setText('totalAssets',man(result.totalInitial)); setText('usableAssets',man(result.chosenInitial)); setText('depleteAge',result.deplete===null?'ショートなし':result.deplete+'歳'); setText('endingUsable',man(result.endingUsable));
+ setText('requiredFreelanceGross',req===0?'0円':man(req)); setText('requiredFreelanceNet',req===0?'0円':man(reqNet)); setText('freelanceGap',gap===0?'不足なし':man(gap));
+ document.getElementById('kpiDeplete').className='kpi '+(result.deplete===null?'good':'bad'); document.getElementById('kpiEnd').className='kpi '+(result.endingUsable>0?'good':'warn'); document.getElementById('kpiReq').className='kpi '+(req===0?'good':'warn'); document.getElementById('kpiGap').className='kpi '+(gap===0?'good':'warn');
+ const monthlyNeed=o.targetMonthly+o.taxSocialMonthly,yearlyNeed=monthlyNeed*12,companyNetMonthly=o.salaryGrossAnnual*(o.salaryNetRate/100)/12,freeNet=o.freelanceGross*o.freelanceNetRate/100;
+ document.getElementById('summaryText').innerHTML='<strong>毎月の考え方</strong><br>手元に残したい額：'+man(o.targetMonthly)+'<br>税・社会保険料など：'+man(o.taxSocialMonthly)+'<br>必要な財源：<strong>'+man(monthlyNeed)+' / 月</strong>（年間 '+man(yearlyNeed)+'）<br>会社員手取り想定：'+man(companyNetMonthly)+' / 月（額面年収 '+man(o.salaryGrossAnnual)+'、'+o.switchAge+'歳まで）<br>フリーランス手取り想定：'+man(freeNet)+' / 月（'+o.switchAge+'歳から'+o.freelanceEndAge+'歳まで）<br>本人老齢年金：'+man(o.oldAgeMonthly)+' / 月（'+o.oldAgeStartAge+'歳から）<br>奥さん老齢年金：'+man(o.spouseOldAgeMonthly)+' / 月（'+o.spouseOldAgeStartAge+'歳から）<br>NISA運用年率：'+o.nisaReturnRate+'% ／ DC運用年率：'+o.dcReturnRate+'%<br>収入で足りない分を、チェックを入れた資産から補填します。収入が必要額を上回る年は、余った分を自分名義の現金系に積み増します。';
+ const firstShort=result.rows.find(r=>r.uncovered>1);
+ document.getElementById('noticeText').innerHTML=firstShort?'<strong>'+firstShort.age+'歳で資金ショートしています。</strong><br>この年は、収入と取り崩し対象資産だけでは <span class="negative">'+man(firstShort.uncovered)+'</span> 足りません。<br>年末総資産がゼロでない場合は、DCがまだ使えない、または「残す」にした資産があるためです。':'<strong>設定上は資金ショートしていません。</strong><br>終了年齢まで、必要額を収入と取り崩し対象資産で埋められる計算です。';
+ renderAssets(o);
+ const tbody=document.getElementById('tbody'); tbody.innerHTML=''; result.rows.forEach(r=>{const tr=document.createElement('tr'); tr.innerHTML='<td>'+r.age+'歳</td><td>'+man(r.need)+'</td><td>'+man(r.selfBenefit)+'</td><td>'+man(r.spousePension)+'</td><td>'+man(r.pension)+'</td><td>'+man(r.salary)+'</td><td>'+man(r.freelance)+'</td><td>'+man(r.surplus)+'</td><td>'+man(r.taken)+'</td><td class="'+(r.uncovered>1?'negative':'')+'">'+(r.uncovered>1?man(r.uncovered):'0円')+'</td><td>'+man(r.usableEnding)+'</td><td>'+man(r.totalEnding)+'</td>'; tbody.appendChild(tr)});
+ draw(result.rows);
+}
+
+
+const authKey='retirement_cashflow_v8_pin_auth';
+const encryptedScenarioKey='retirement_cashflow_v8_encrypted_scenarios';
+let latestRows=[];
+let sessionKey=null;
+let currentPin=null;
+function safeNow(){const d=new Date(); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())}
+function setStatus(msg){setText('saveStatus',msg)}
+function setAuthMessage(msg){setText('authMessage',msg)}
+function toB64(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)))}
+function fromB64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+function randomBytes(n=16){return crypto.getRandomValues(new Uint8Array(n))}
+async function deriveKey(pin,salt){
+ const enc=new TextEncoder();
+ const base=await crypto.subtle.importKey('raw',enc.encode(pin),{name:'PBKDF2'},false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:180000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encryptJson(obj,key){
+ const iv=randomBytes(12); const enc=new TextEncoder();
+ const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(obj)));
+ return {iv:toB64(iv),ct:toB64(ct)};
+}
+async function decryptJson(bundle,key){
+ const iv=fromB64(bundle.iv); const ct=fromB64(bundle.ct);
+ const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
+ return JSON.parse(new TextDecoder().decode(pt));
+}
+function getScenarioPayload(){return {app:'retirement_cashflow_simulator_simple',version:'v8',savedAt:safeNow(),name:(document.getElementById('scenarioName').value||'無題シナリオ').trim(),values:read()}}
+function applyScenarioValues(values){
+ if(!values) return;
+ ids.forEach(id=>{if(values[id]!==undefined && document.getElementById(id)) document.getElementById(id).value=values[id]});
+ checks.forEach(id=>{if(values[id]!==undefined && document.getElementById(id)) document.getElementById(id).checked=!!values[id]});
+ render();
+}
+async function setupPin(){
+ const p1=document.getElementById('newPin').value; const p2=document.getElementById('newPin2').value;
+ if(!p1 || p1.length<4){setAuthMessage('PINは4桁以上にしてください。'); return}
+ if(p1!==p2){setAuthMessage('確認用PINが一致しません。'); return}
+ const salt=randomBytes(16); const key=await deriveKey(p1,salt);
+ const verifier=await encryptJson({ok:true,createdAt:safeNow()},key);
+ localStorage.setItem(authKey,JSON.stringify({salt:toB64(salt),verifier}));
+ sessionKey=key; currentPin=p1; await unlockApp();
+}
+async function unlockPin(){
+ try{
+   const pin=document.getElementById('unlockPin').value; const auth=JSON.parse(localStorage.getItem(authKey)||'null');
+   if(!auth){showSetup(); return}
+   const key=await deriveKey(pin,fromB64(auth.salt));
+   const check=await decryptJson(auth.verifier,key);
+   if(!check || !check.ok) throw new Error('invalid');
+   sessionKey=key; currentPin=pin; await unlockApp();
+ }catch(e){setAuthMessage('PINが違うか、保存データを読み込めません。');}
+}
+function showSetup(){document.getElementById('setupBox').hidden=false;document.getElementById('unlockBox').hidden=true;setAuthMessage('')}
+function showUnlock(){document.getElementById('setupBox').hidden=true;document.getElementById('unlockBox').hidden=false;setAuthMessage('')}
+async function unlockApp(){
+ document.getElementById('authScreen').style.display='none'; document.getElementById('appRoot').hidden=false;
+ resetDefaults(); await refreshScenarioList(); render();
+}
+function lockApp(){sessionKey=null; currentPin=null; document.getElementById('appRoot').hidden=true; document.getElementById('authScreen').style.display='flex'; showUnlock(); document.getElementById('unlockPin').value=''}
+function clearAllProtectedData(){
+ if(!confirm('PINと暗号化された保存シナリオをこのブラウザから削除します。よろしいですか？')) return;
+ localStorage.removeItem(authKey); localStorage.removeItem(encryptedScenarioKey); location.reload();
+}
+async function readStoredScenarios(){
+ if(!sessionKey) return [];
+ const raw=localStorage.getItem(encryptedScenarioKey); if(!raw) return [];
+ try{return await decryptJson(JSON.parse(raw),sessionKey)}catch(e){setStatus('保存シナリオの復号に失敗しました。PINが違う可能性があります。'); return []}
+}
+async function writeStoredScenarios(list){
+ if(!sessionKey) throw new Error('ロック中です');
+ localStorage.setItem(encryptedScenarioKey,JSON.stringify(await encryptJson(list,sessionKey)));
+}
+async function refreshScenarioList(){
+ const sel=document.getElementById('scenarioSelect'); if(!sel)return;
+ const list=await readStoredScenarios();
+ sel.innerHTML='<option value="">保存したシナリオを選択</option>';
+ list.forEach((sc,i)=>{const opt=document.createElement('option'); opt.value=String(i); opt.textContent=(sc.name||'無題シナリオ')+'（'+(sc.savedAt||'保存日時なし')+'）'; sel.appendChild(opt)});
+}
+async function saveScenario(){
+ try{
+   const payload=getScenarioPayload(); let list=await readStoredScenarios();
+   const same=list.findIndex(sc=>sc.name===payload.name);
+   if(same>=0) list[same]=payload; else list.unshift(payload);
+   list=list.slice(0,30); await writeStoredScenarios(list); await refreshScenarioList(); document.getElementById('scenarioSelect').value='0';
+   setStatus('暗号化して保存しました：'+payload.name+'（'+payload.savedAt+'）');
+ }catch(e){setStatus('保存に失敗しました：'+e.message)}
+}
+async function loadScenario(){
+ const idx=document.getElementById('scenarioSelect').value; if(idx===''){setStatus('読み込むシナリオを選んでください。');return}
+ const sc=(await readStoredScenarios())[Number(idx)]; if(!sc){setStatus('選択したシナリオが見つかりません。');return}
+ document.getElementById('scenarioName').value=sc.name||'無題シナリオ'; applyScenarioValues(sc.values); setStatus('読み込みました：'+(sc.name||'無題シナリオ'));
+}
+async function deleteScenario(){
+ const idx=document.getElementById('scenarioSelect').value; if(idx===''){setStatus('削除するシナリオを選んでください。');return}
+ const list=await readStoredScenarios(); const removed=list.splice(Number(idx),1)[0]; await writeStoredScenarios(list); await refreshScenarioList(); setStatus('削除しました：'+((removed&&removed.name)||'無題シナリオ'));
+}
+async function exportScenario(){
+ try{
+   if(!currentPin){setStatus('ロック解除中のみ書き出せます。'); return}
+   const payload=getScenarioPayload(); const salt=randomBytes(16); const key=await deriveKey(currentPin,salt);
+   const encrypted=await encryptJson(payload,key);
+   const filePayload={app:'retirement_cashflow_simulator_simple',version:'v8-encrypted-export',encrypted:true,kdf:'PBKDF2-SHA256-180000',salt:toB64(salt),payload:encrypted};
+   const cleanName=(payload.name||'scenario').replace(/[\/:*?"<>|\s]+/g,'_').slice(0,50) || 'scenario';
+   const blob=new Blob([JSON.stringify(filePayload,null,2)],{type:'application/json;charset=utf-8'});
+   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cashflow_encrypted_'+cleanName+'.json'; a.click(); URL.revokeObjectURL(a.href); setStatus('暗号化JSONを書き出しました：'+payload.name);
+ }catch(e){setStatus('JSON書き出しに失敗しました：'+e.message)}
+}
+function importScenario(ev){
+ const file=ev.target.files && ev.target.files[0]; if(!file)return;
+ const reader=new FileReader();
+ reader.onload=async()=>{
+   try{
+     const payload=JSON.parse(reader.result); let sc;
+     if(payload.encrypted){
+       if(!currentPin) throw new Error('ロック解除中のみ暗号化JSONを読み込めます');
+       const key=await deriveKey(currentPin,fromB64(payload.salt)); sc=await decryptJson(payload.payload,key);
+     }else{
+       if(!confirm('暗号化されていないJSONです。読み込みますか？')) return;
+       sc=payload;
+     }
+     const values=sc.values||sc; document.getElementById('scenarioName').value=sc.name||file.name.replace(/\.json$/,''); applyScenarioValues(values); setStatus('JSONファイルを読み込みました：'+(sc.name||file.name));
+   }catch(e){setStatus('JSONファイルを読み込めませんでした：'+e.message)}
+   ev.target.value='';
+ };
+ reader.readAsText(file,'utf-8');
+}
+function initAuth(){
+ if(!window.crypto || !crypto.subtle){document.getElementById('authMessage').textContent='このブラウザは暗号化保存に対応していません。Chrome / Edge / Safari の最新版で開いてください。'; return}
+ document.getElementById('setupPinBtn').addEventListener('click',setupPin); document.getElementById('unlockPinBtn').addEventListener('click',unlockPin); document.getElementById('clearAllBtn').addEventListener('click',clearAllProtectedData); document.getElementById('logoutBtn').addEventListener('click',lockApp);
+ document.getElementById('unlockPin').addEventListener('keydown',e=>{if(e.key==='Enter')unlockPin()});
+ document.getElementById('newPin2').addEventListener('keydown',e=>{if(e.key==='Enter')setupPin()});
+ if(localStorage.getItem(authKey)) showUnlock(); else showSetup();
+}
+function resetDefaults(){ids.forEach(id=>{document.getElementById(id).value=defaults[id]}); checks.forEach(id=>{document.getElementById(id).checked=defaults[id]}); render()}
+function downloadCsv(){
+ const header='年齢,必要額,本人年金給付,奥さん老齢年金,年金給付合計,会社員手取り,フリーランス手取り,余ったお金,資産から補填,補填できない不足,年末使える残高,年末総資産\n';
+ const body=latestRows.map(r=>[r.age,Math.round(r.need),Math.round(r.selfBenefit),Math.round(r.spousePension),Math.round(r.pension),Math.round(r.salary),Math.round(r.freelance),Math.round(r.surplus),Math.round(r.taken),Math.round(r.uncovered),Math.round(r.usableEnding),Math.round(r.totalEnding)].join(',')).join('\n');
+ const blob=new Blob(['\ufeff'+header+body],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cashflow_simulation_simple_v8.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+ids.forEach(id=>document.getElementById(id).addEventListener('input',render)); checks.forEach(id=>document.getElementById(id).addEventListener('change',render));
+document.getElementById('resetBtn').addEventListener('click',resetDefaults); document.getElementById('csvBtn').addEventListener('click',downloadCsv);
+document.getElementById('saveScenarioBtn').addEventListener('click',()=>saveScenario()); document.getElementById('loadScenarioBtn').addEventListener('click',()=>loadScenario()); document.getElementById('deleteScenarioBtn').addEventListener('click',()=>deleteScenario()); document.getElementById('exportScenarioBtn').addEventListener('click',()=>exportScenario()); document.getElementById('importScenarioFile').addEventListener('change',importScenario);
+try{initAuth()}catch(e){document.getElementById('authMessage').textContent='初期化エラー：'+e.message; console.error(e)}
+if('serviceWorker' in navigator && location.protocol !== 'file:'){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+})();
+</script>
+</body>
+</html>

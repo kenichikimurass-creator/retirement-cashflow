@@ -1,7 +1,7 @@
 {
   "name": "退職後キャッシュフロー試算",
   "short_name": "CF試算",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=11",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f6fb",

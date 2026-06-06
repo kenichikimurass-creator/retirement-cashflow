@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>退職後キャッシュフロー・シンプル試算 v10 ログアウト対応版</title>
+<title>退職後キャッシュフロー・シンプル試算 v11 自動幅調整版</title>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e4e7ec;--accent:#2457c5;--good:#087443;--bad:#b42318;--warn:#b54708;--soft:#eef4ff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic","YuGothic","Meiryo",sans-serif}header{background:#101828;color:#fff;padding:22px 28px}h1{margin:0;font-size:22px}header p{margin:8px 0 0;color:#d0d5dd;font-size:13px;line-height:1.7}main{display:grid;grid-template-columns:410px 1fr;gap:16px;padding:16px;max-width:1480px;margin:auto}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.06)}.panel{padding:16px;position:sticky;top:10px;height:calc(100vh - 112px);overflow:auto}.section{padding-top:16px;margin-top:16px;border-top:1px solid var(--line)}.section:first-child{border-top:0;margin-top:0;padding-top:0}h2{font-size:15px;margin:0 0 12px}.field{margin:13px 0}label{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:13px;font-weight:700}label span:last-child{color:var(--accent);white-space:nowrap}input[type=range]{width:100%}.hint{font-size:12px;line-height:1.75;color:var(--muted);background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:10px}.checkrow{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55;margin:9px 0}.checkrow input{margin-top:3px}.checkrow strong{display:block}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}button{border:0;border-radius:10px;padding:10px 12px;font-weight:800;cursor:pointer;background:#101828;color:white}button.secondary{background:#e4e7ec;color:#101828}button.danger{background:#fee4e2;color:#912018}.savegrid{display:grid;grid-template-columns:1fr;gap:8px}.savegrid input,.savegrid select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;background:white}.savegrid .actions{grid-template-columns:1fr 1fr}.status{font-size:12px;line-height:1.6;color:var(--muted);min-height:1.2em}.content{display:flex;flex-direction:column;gap:14px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.kpi{background:white;border:1px solid var(--line);border-radius:15px;padding:14px}.kpi .label{font-size:12px;color:var(--muted);line-height:1.45}.kpi .value{font-size:22px;font-weight:900;margin-top:6px}.good .value{color:var(--good)}.bad .value{color:var(--bad)}.warn .value{color:var(--warn)}.card{padding:16px}.card h3{margin:0 0 10px;font-size:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini{font-size:12px;color:var(--muted);line-height:1.7}.formula{background:var(--soft);border:1px solid #c7d7fe;border-radius:12px;padding:12px;font-size:13px;line-height:1.8}.notice{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;font-size:13px;line-height:1.75;color:#7c2d12}canvas{width:100%;height:320px;border:1px solid var(--line);border-radius:12px;background:white}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{background:#f9fafb;position:sticky;top:0}.tablewrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:12px}.assetlines{display:grid;grid-template-columns:1fr auto auto;gap:7px 12px;font-size:13px;align-items:center}.assetlines div:nth-child(3n+2){text-align:right;font-weight:800}.tag{font-size:11px;border-radius:999px;padding:3px 8px;text-align:center}.tag.use{background:#ecfdf3;color:#087443}.tag.keep{background:#f2f4f7;color:#475467}.tag.lock{background:#fff7ed;color:#b54708}.negative{color:var(--bad);font-weight:800}.subtle{color:var(--muted)}
@@ -56,6 +56,33 @@
   td:first-child::before{content:'';display:none}
 }
 
+
+
+/* v11: PC/タブレット/スマホの横幅に自動フィット。
+   ページ全体の横スクロールを防ぎ、長い表だけカード内で収める。 */
+html,body{max-width:100%;overflow-x:hidden}
+header,main,.panel,.content,.card,.kpi,.tablewrap,canvas{max-width:100%}
+main{width:100%;grid-template-columns:minmax(300px,410px) minmax(0,1fr)}
+.content,.panel,.card,.kpi,.grid>*,.grid3>*,.two>*{min-width:0}
+.grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kpi .value,.formula,.notice,.hint,.mini{overflow-wrap:anywhere}
+.tablewrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+table{max-width:100%}
+@media(min-width:1051px){
+  .tablewrap table{width:100%}
+  th,td{font-size:clamp(10px,.72vw,12px);padding:7px 6px}
+  .kpi .value{font-size:clamp(18px,1.45vw,22px)}
+}
+@media(max-width:1280px) and (min-width:1051px){
+  main{grid-template-columns:minmax(280px,360px) minmax(0,1fr);padding:12px;gap:12px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:1050px){
+  main{width:100%;max-width:100%;padding:12px}
+}
+
 </style>
 </head>
 <body>
@@ -86,7 +113,7 @@
 </div>
 <div id="appRoot" hidden>
 <header>
-  <h1>退職後キャッシュフロー・シンプル試算 v10 ログアウト対応版</h1>
+  <h1>退職後キャッシュフロー・シンプル試算 v11 自動幅調整版</h1>
   <p>月30万円を手元に残すために、年金・フリーランス収入・資産取り崩しをざっくり確認します。GitHub Pages公開を前提に、初期値に個人資産額は入れていません。保存データはPINから作る鍵で暗号化して、この端末のブラウザ内に保存します。</p>
   <div class="topbar"><span class="mini">保存シナリオはPINで暗号化されます。終了時は「ログアウト」を押すと画面をロックします。</span><button id="logoutBtn" class="secondary">ログアウト</button></div>
 </header>
